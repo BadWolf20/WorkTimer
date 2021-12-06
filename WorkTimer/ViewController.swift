@@ -9,11 +9,47 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    // MARK: - Components
+
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+
+        setupHierarchy()
+        setupLayout()
+        setupView()
+    }
+
+    // MARK: - Settings
+    private func setupHierarchy() {
+
+    }
+
+    private func setupLayout() {
+
+    }
+
+    private func setupView() {
+
     }
 
 
+}
+
+// MARK: - Constants
+
+extension ViewController{
+    enum Colors {
+
+    }
+
+    enum Metric {
+
+    }
+
+    enum Strings {
+
+    }
 }
 
