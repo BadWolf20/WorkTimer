@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     private lazy var startButton: UIButton = {
         let button = UIButton(type: .system)
         let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
-        button.setImage(UIImage(systemName: "play",withConfiguration: imageConfiguration)?.withTintColor(.systemRed, renderingMode: .alwaysOriginal), for: .normal)
+        button.setImage(getImage(name: "play"), for: .normal)
 
         button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
 //        button.backgroundColor = backGroundColor
@@ -27,8 +27,8 @@ class ViewController: UIViewController {
 
     private lazy var timeLable: UILabel = {
         let label = UILabel()
-        label.text = "10"
-        label.textColor = .red
+        label.text = workClock.getTime()
+        label.textColor = buttonColor
         label.font = .systemFont(ofSize: 40, weight: .medium)
 
         return label
@@ -37,6 +37,8 @@ class ViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        workClock.setTime(minutes: 0, seconds: 3)
 
         setupHierarchy()
         setupLayout()
@@ -68,24 +70,28 @@ class ViewController: UIViewController {
     }
 
     // MARK: - Actions
-
+    var isWorkTime = true
     var isStarded = false
+    var workClock = clock()
+    var buttonColor: UIColor = .systemRed
+    let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
 
     @objc private func buttonAction() {
         if !isStarded {
-            let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
-            startButton.setImage(UIImage(systemName: "pause",withConfiguration: imageConfiguration)?.withTintColor(.systemRed, renderingMode: .alwaysOriginal), for: .normal)
+
+            startButton.setImage(getImage(name: "pause"), for: .normal)
             startStopTimer()
             isStarded = true
         } else {
-            let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
-            startButton.setImage(UIImage(systemName: "play",withConfiguration: imageConfiguration)?.withTintColor(.systemRed, renderingMode: .alwaysOriginal), for: .normal)
+
+            startButton.setImage(getImage(name: "play"), for: .normal)
             startStopTimer()
             isStarded = false
         }
     }
 
     var timer = Timer()
+
     private func startStopTimer(){
         if !timer.isValid{
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(UpdateTimer), userInfo: nil, repeats: true)
@@ -95,21 +101,50 @@ class ViewController: UIViewController {
     }
 
     private func rebootTimer(){
-        timeLable.text = String(10)
+
+        changeClock()
+        timeLable.text = workClock.getTime()
+
         isStarded = false
-        let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
-        startButton.setImage(UIImage(systemName: "play",withConfiguration: imageConfiguration)?.withTintColor(.systemRed, renderingMode: .alwaysOriginal), for: .normal)
+
+        startButton.setImage(getImage(name: "play"), for: .normal)
+        timeLable.textColor = buttonColor
     }
 
     @objc func UpdateTimer() {
-        var counter = Int(timeLable.text ?? "0") ?? 0
-        if counter < 1 {
+        if workClock.getTime() == "00:00:00" {
             timer.invalidate()
             rebootTimer()
         } else {
-            counter = counter - 1
-            timeLable.text = String(counter)
+            workClock.minusSec()
+            timeLable.text = workClock.getTime()
         }
+    }
+
+    private func changeClock(){
+        if isWorkTime {
+            isWorkTime = false
+            buttonColor = .systemGreen
+            workClock.setTime(minutes: 0, seconds: 10)
+        } else  {
+            isWorkTime = true
+            buttonColor = .systemRed
+            workClock.setTime(minutes: 0, seconds: 5)
+        }
+    }
+
+    func getImage(name: String) -> UIImage{
+        let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
+        var image: UIImage
+        switch name {
+            case "play":
+                image =  UIImage(systemName: "play",withConfiguration: imageConfiguration)!
+            case "pause":
+                image =  UIImage(systemName: "pause",withConfiguration: imageConfiguration)!
+            default:
+                image =  UIImage(systemName: "xmark.octagon",withConfiguration: imageConfiguration)!
+        }
+        return image.withTintColor(buttonColor, renderingMode: .alwaysOriginal)
     }
 
 }
@@ -130,3 +165,50 @@ extension ViewController{
     }
 }
 
+struct clock {
+    private var second = 0
+    private var minute = 0
+    private var hour = 0
+
+    mutating func setTime(hours: Int, minutes: Int, seconds: Int) {
+        second = seconds
+        minute = minutes
+        hour = hours
+    }
+
+    mutating func setTime(minutes: Int, seconds: Int) {
+        minute = minutes
+        second = seconds
+    }
+
+    mutating func minusSec() {
+        if second == 0 {
+            if minute == 0 {
+                if hour == 0 {
+                    return
+                }
+                minute = 60
+                hour = hour - 1
+            }
+            second = 59
+            minute = minute - 1
+        } else {
+            second = second - 1
+        }
+    }
+
+    func getTime() -> String {
+        var out: String = ""
+
+        for number in [hour, minute, second] {
+            if number < 10 {
+                out += String(0) + String(number) + ":"
+            } else {
+                out += String(number) + ":"
+            }
+        }
+        out.removeLast()
+        return out
+    }
+
+}
