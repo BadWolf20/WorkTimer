@@ -10,17 +10,10 @@ import UIKit
 class ViewController: UIViewController {
 
     // MARK: - Components
-    private lazy var startButton: UIButton = {
+    private lazy var startStopButton: UIButton = {
         let button = UIButton(type: .system)
-        let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
         button.setImage(getImage(name: "play"), for: .normal)
-
         button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
-//        button.backgroundColor = backGroundColor
-//        button.titleLabel?.font = .systemFont(ofSize: Metric.buttonsFontSize, weight: .medium)
-//
-//        button.layer.masksToBounds = true
-//        button.layer.cornerRadius = Metric.buttonsHeight / 2
 
         return button
     }()
@@ -29,7 +22,7 @@ class ViewController: UIViewController {
         let label = UILabel()
         label.text = workClock.getTime()
         label.textColor = buttonColor
-        label.font = .systemFont(ofSize: 40, weight: .medium)
+        label.font = .systemFont(ofSize: Metric.timeLableFontSize, weight: .medium)
 
         return label
     }()
@@ -38,7 +31,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        workClock.setTime(minutes: 0, seconds: 3)
+        workClock.setTime(minutes: 0, seconds: 10)
 
         setupHierarchy()
         setupLayout()
@@ -47,21 +40,20 @@ class ViewController: UIViewController {
 
     // MARK: - Settings
     private func setupHierarchy() {
-        view.addSubview(startButton)
+        view.addSubview(startStopButton)
         view.addSubview(timeLable)
     }
 
     private func setupLayout() {
-        startButton.translatesAutoresizingMaskIntoConstraints = false
-        startButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        startButton.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        startButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        startButton.heightAnchor.constraint(equalToConstant: 80).isActive = true
-
         timeLable.translatesAutoresizingMaskIntoConstraints = false
         timeLable.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        timeLable.bottomAnchor.constraint(equalTo: startButton.topAnchor, constant: -20).isActive = true
+        timeLable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: Metric.timeLableIndentTop).isActive = true
 
+        startStopButton.translatesAutoresizingMaskIntoConstraints = false
+        startStopButton.topAnchor.constraint(equalTo: timeLable.bottomAnchor, constant: Metric.startStopButtonIndentTop).isActive = true
+        startStopButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        startStopButton.widthAnchor.constraint(equalToConstant: Metric.startStopButtonWidth).isActive = true
+        startStopButton.heightAnchor.constraint(equalToConstant: Metric.startStopButtonHeight).isActive = true
 
     }
 
@@ -73,24 +65,21 @@ class ViewController: UIViewController {
     var isWorkTime = true
     var isStarded = false
     var workClock = clock()
-    var buttonColor: UIColor = .systemRed
-    let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
+    var buttonColor: UIColor = Colors.workColor
+    var timer = Timer()
+
 
     @objc private func buttonAction() {
         if !isStarded {
-
-            startButton.setImage(getImage(name: "pause"), for: .normal)
+            startStopButton.setImage(getImage(name: "pause"), for: .normal)
             startStopTimer()
             isStarded = true
         } else {
-
-            startButton.setImage(getImage(name: "play"), for: .normal)
+            startStopButton.setImage(getImage(name: "play"), for: .normal)
             startStopTimer()
             isStarded = false
         }
     }
-
-    var timer = Timer()
 
     private func startStopTimer(){
         if !timer.isValid{
@@ -107,7 +96,7 @@ class ViewController: UIViewController {
 
         isStarded = false
 
-        startButton.setImage(getImage(name: "play"), for: .normal)
+        startStopButton.setImage(getImage(name: "play"), for: .normal)
         timeLable.textColor = buttonColor
     }
 
@@ -124,17 +113,17 @@ class ViewController: UIViewController {
     private func changeClock(){
         if isWorkTime {
             isWorkTime = false
-            buttonColor = .systemGreen
-            workClock.setTime(minutes: 0, seconds: 10)
+            buttonColor = Colors.restColor
+            workClock.setTime(minutes: 0, seconds: 5)
         } else  {
             isWorkTime = true
-            buttonColor = .systemRed
-            workClock.setTime(minutes: 0, seconds: 5)
+            buttonColor = Colors.workColor
+            workClock.setTime(minutes: 0, seconds: 10)
         }
     }
 
     func getImage(name: String) -> UIImage{
-        let imageConfiguration = UIImage.SymbolConfiguration(pointSize: 72)
+        let imageConfiguration = UIImage.SymbolConfiguration(pointSize: Metric.startStopImageSize)
         var image: UIImage
         switch name {
             case "play":
@@ -153,10 +142,17 @@ class ViewController: UIViewController {
 
 extension ViewController{
     enum Colors {
-
+        static let workColor: UIColor = .systemRed
+        static let restColor: UIColor = .systemGreen
     }
 
     enum Metric {
+        static let timeLableFontSize: CGFloat = 40
+        static let timeLableIndentTop: CGFloat = 220
+        static let startStopButtonHeight: CGFloat = 80
+        static let startStopButtonWidth: CGFloat = 80
+        static let startStopImageSize: CGFloat = 72
+        static let startStopButtonIndentTop: CGFloat = 30
 
     }
 
