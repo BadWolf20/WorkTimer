@@ -27,11 +27,48 @@ class ViewController: UIViewController {
         return label
     }()
 
+    private lazy var progressLayer: CAShapeLayer = {
+        let layer = CAShapeLayer()
+        let circularPath = UIBezierPath(arcCenter: CGPoint(x: Metric.progressCenterX,
+                                                           y: Metric.progressCenterY),
+                                        radius: Metric.progressRadius,
+                                        startAngle: -CGFloat.pi / 2,
+                                        endAngle: 3 * CGFloat.pi / 2,
+                                        clockwise: true)
+        layer.path = circularPath.cgPath
+
+        layer.strokeColor = Colors.workColor.cgColor
+        layer.lineWidth = Metric.progressLineWidth
+        layer.fillColor = UIColor.clear.cgColor
+        layer.lineCap = CAShapeLayerLineCap.round
+        layer.strokeEnd = 0
+
+        return layer
+    }()
+
+    private lazy var trackLayer: CAShapeLayer = {
+        let layer = CAShapeLayer()
+        let circularPath = UIBezierPath(arcCenter: CGPoint(x: Metric.progressCenterX,
+                                                           y: Metric.progressCenterY),
+                                        radius: Metric.progressRadius,
+                                        startAngle: -CGFloat.pi / 2,
+                                        endAngle: 3 * CGFloat.pi / 2,
+                                        clockwise: true)
+        layer.path = circularPath.cgPath
+
+        layer.strokeColor = UIColor.systemGray5.cgColor
+        layer.lineWidth = Metric.progressLineWidth
+        layer.fillColor = UIColor.clear.cgColor
+
+        return layer
+    }()
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
         workClock.setTime(minutes: 0, seconds: 10)
+        handleTap(duration: workClock.getSeconds())
 
         setupHierarchy()
         setupLayout()
@@ -42,6 +79,9 @@ class ViewController: UIViewController {
     private func setupHierarchy() {
         view.addSubview(startStopButton)
         view.addSubview(timeLable)
+        startStopButton.layer.addSublayer(trackLayer)
+        startStopButton.layer.addSublayer(progressLayer)
+
     }
 
     private func setupLayout() {
@@ -54,7 +94,6 @@ class ViewController: UIViewController {
         startStopButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         startStopButton.widthAnchor.constraint(equalToConstant: Metric.startStopButtonWidth).isActive = true
         startStopButton.heightAnchor.constraint(equalToConstant: Metric.startStopButtonHeight).isActive = true
-
     }
 
     private func setupView() {
@@ -73,10 +112,12 @@ class ViewController: UIViewController {
         if !isStarded {
             startStopButton.setImage(getImage(name: "pause"), for: .normal)
             startStopTimer()
+            resumeAnimation()
             isStarded = true
         } else {
             startStopButton.setImage(getImage(name: "play"), for: .normal)
             startStopTimer()
+            pauseAnimation()
             isStarded = false
         }
     }
@@ -101,12 +142,11 @@ class ViewController: UIViewController {
     }
 
     @objc func UpdateTimer() {
+        workClock.minusSec()
+        timeLable.text = workClock.getTime()
         if workClock.getTime() == "00:00:00" {
             timer.invalidate()
             rebootTimer()
-        } else {
-            workClock.minusSec()
-            timeLable.text = workClock.getTime()
         }
     }
 
@@ -115,10 +155,14 @@ class ViewController: UIViewController {
             isWorkTime = false
             buttonColor = Colors.restColor
             workClock.setTime(minutes: 0, seconds: 5)
+            handleTap(duration: workClock.getSeconds())
+            progressLayer.strokeColor = Colors.restColor.cgColor
         } else  {
             isWorkTime = true
             buttonColor = Colors.workColor
             workClock.setTime(minutes: 0, seconds: 10)
+            handleTap(duration: workClock.getSeconds())
+            progressLayer.strokeColor = Colors.workColor.cgColor
         }
     }
 
@@ -153,6 +197,10 @@ extension ViewController{
         static let startStopButtonWidth: CGFloat = 80
         static let startStopImageSize: CGFloat = 72
         static let startStopButtonIndentTop: CGFloat = 30
+        static let progressRadius: CGFloat = 150
+        static let progressLineWidth: CGFloat = 5
+        static let progressCenterX: CGFloat = Metric.startStopButtonWidth / 2
+        static let progressCenterY: CGFloat = Metric.startStopButtonHeight / 2 - 40
 
     }
 
@@ -160,6 +208,45 @@ extension ViewController{
 
     }
 }
+
+//MARK: - Progress bar
+extension ViewController{
+    private func handleTap(duration: Int) {
+        let basicAnimation = CABasicAnimation(keyPath: "strokeEnd")
+        basicAnimation.toValue =  1
+        basicAnimation.duration = Double(duration)
+        basicAnimation.fillMode = CAMediaTimingFillMode.forwards
+        basicAnimation.isRemovedOnCompletion = false
+
+        progressLayer.add(basicAnimation, forKey: "urSoBasic")
+        pauseAnimation()
+    }
+
+    func resumeAnimation(){
+        let pausedTime = progressLayer.timeOffset
+        //pointerLayer.speed = 1
+        //pointerLayer.timeOffset = 0
+        //pointerLayer.beginTime = 0
+        progressLayer.speed = 1
+        progressLayer.timeOffset = 0
+        progressLayer.beginTime = 0
+        let timeSincePause = progressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
+        //pointerLayer.beginTime = timeSincePause
+        progressLayer.beginTime = timeSincePause
+        //progressLayer.strokeColor = UIColor.systemGreen.cgColor
+      }
+
+    func pauseAnimation(){
+        let pausedTime = progressLayer.convertTime(CACurrentMediaTime(), from: nil)
+        //pointerLayer.speed = 0
+        //pointerLayer.timeOffset = pausedTime
+        progressLayer.speed = 0
+        progressLayer.timeOffset = pausedTime
+      }
+
+}
+
+
 
 struct clock {
     private var second = 0
@@ -205,6 +292,12 @@ struct clock {
         }
         out.removeLast()
         return out
+    }
+
+    func getSeconds() -> Int {
+        let ms = minute * 60
+        let hs = hour * 60 * 60
+        return second + ms + hs
     }
 
 }
