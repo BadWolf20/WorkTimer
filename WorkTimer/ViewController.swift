@@ -56,7 +56,7 @@ class ViewController: UIViewController {
                                         clockwise: true)
         layer.path = circularPath.cgPath
 
-        layer.strokeColor = UIColor.systemGray5.cgColor
+        layer.strokeColor = Colors.trackShadeColor
         layer.lineWidth = Metric.progressLineWidth
         layer.fillColor = UIColor.clear.cgColor
 
@@ -67,7 +67,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        workClock.setTime(minutes: 0, seconds: 10)
+        workClock.setTime(minutes: Metric.timeWorkMinutes, seconds: Metric.timeWorkSeconds)
         handleTap(duration: workClock.getSeconds())
 
         setupHierarchy()
@@ -154,13 +154,13 @@ class ViewController: UIViewController {
         if isWorkTime {
             isWorkTime = false
             buttonColor = Colors.restColor
-            workClock.setTime(minutes: 0, seconds: 5)
+            workClock.setTime(minutes: Metric.timeRestMinutes, seconds: Metric.timeRestSeconds)
             handleTap(duration: workClock.getSeconds())
             progressLayer.strokeColor = Colors.restColor.cgColor
         } else  {
             isWorkTime = true
             buttonColor = Colors.workColor
-            workClock.setTime(minutes: 0, seconds: 10)
+            workClock.setTime(minutes: Metric.timeWorkMinutes, seconds: Metric.timeWorkSeconds)
             handleTap(duration: workClock.getSeconds())
             progressLayer.strokeColor = Colors.workColor.cgColor
         }
@@ -188,6 +188,7 @@ extension ViewController{
     enum Colors {
         static let workColor: UIColor = .systemRed
         static let restColor: UIColor = .systemGreen
+        static let trackShadeColor: CGColor = UIColor.systemGray5.cgColor
     }
 
     enum Metric {
@@ -198,9 +199,13 @@ extension ViewController{
         static let startStopImageSize: CGFloat = 72
         static let startStopButtonIndentTop: CGFloat = 30
         static let progressRadius: CGFloat = 150
-        static let progressLineWidth: CGFloat = 5
+        static let progressLineWidth: CGFloat = 3
         static let progressCenterX: CGFloat = Metric.startStopButtonWidth / 2
         static let progressCenterY: CGFloat = Metric.startStopButtonHeight / 2 - 40
+        static let timeWorkMinutes: Int = 1
+        static let timeWorkSeconds: Int = 0
+        static let timeRestMinutes: Int = 0
+        static let timeRestSeconds: Int = 30
 
     }
 
@@ -209,7 +214,7 @@ extension ViewController{
     }
 }
 
-//MARK: - Progress bar
+//MARK: - Progress bar functions
 extension ViewController{
     private func handleTap(duration: Int) {
         let basicAnimation = CABasicAnimation(keyPath: "strokeEnd")
@@ -224,26 +229,18 @@ extension ViewController{
 
     func resumeAnimation(){
         let pausedTime = progressLayer.timeOffset
-        //pointerLayer.speed = 1
-        //pointerLayer.timeOffset = 0
-        //pointerLayer.beginTime = 0
         progressLayer.speed = 1
         progressLayer.timeOffset = 0
         progressLayer.beginTime = 0
         let timeSincePause = progressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
-        //pointerLayer.beginTime = timeSincePause
         progressLayer.beginTime = timeSincePause
-        //progressLayer.strokeColor = UIColor.systemGreen.cgColor
       }
 
     func pauseAnimation(){
         let pausedTime = progressLayer.convertTime(CACurrentMediaTime(), from: nil)
-        //pointerLayer.speed = 0
-        //pointerLayer.timeOffset = pausedTime
         progressLayer.speed = 0
         progressLayer.timeOffset = pausedTime
       }
-
 }
 
 
