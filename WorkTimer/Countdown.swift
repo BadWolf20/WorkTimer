@@ -11,6 +11,7 @@ class Countdown {
     var hours: Int
     var minutes: Int
     var seconds: Int
+    private var milliseconds: Int
     var isRunning: Bool {
         return timer != nil
     }
@@ -20,16 +21,18 @@ class Countdown {
     var onTick: ((String) -> Void)?
     var onCompletion: (() -> Void)?
 
-    init(hours: Int, minutes: Int, seconds: Int) {
+    init(hours: Int, minutes: Int, seconds: Int, milliseconds: Int = 0) {
         self.hours = hours
         self.minutes = minutes
         self.seconds = seconds
+        self.milliseconds = milliseconds
     }
 
     init() {
         self.hours = 0
         self.minutes = 0
         self.seconds = 0
+        self.milliseconds = 0
     }
 
     // Возвращает общее количество секунд
@@ -39,27 +42,35 @@ class Countdown {
 
     // Уменьшает счетчик на одну секунду
     private func decrement() {
-        if seconds > 0 {
+        if milliseconds > 0 {
+            milliseconds -= 10
+        } else if seconds > 0 {
             seconds -= 1
+            milliseconds = 990
         } else if minutes > 0 {
             minutes -= 1
             seconds = 59
+            milliseconds = 990
         } else if hours > 0 {
             hours -= 1
             minutes = 59
             seconds = 59
+            milliseconds = 990
         }
     }
 
     // Возвращает строковое представление времени
     func timeString() -> String {
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        let roundedSeconds = milliseconds >= 1 ? seconds + 1 : seconds
+        return String(format: "%02d:%02d:%02d", hours, minutes, roundedSeconds)
     }
+
+    
 
     // Запускает или возобновляет таймер
     func start() {
         if timer == nil {
-            timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(update), userInfo: nil, repeats: true)
+            timer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(update), userInfo: nil, repeats: true)
         } else {
             timer?.fire()
         }
@@ -72,18 +83,20 @@ class Countdown {
     }
 
     // Останавливает и сбрасывает таймер
-    func reset(hours: Int, minutes: Int, seconds: Int) {
+    func reset(hours: Int, minutes: Int, seconds: Int, milliseconds: Int = 0) {
         pause()
         self.hours = hours
         self.minutes = minutes
         self.seconds = seconds
+        self.milliseconds = milliseconds
+
     }
 
     @objc private func update() {
         decrement()
         onTick?(timeString())
 
-        if totalSeconds() == 0 {
+        if totalSeconds() == 0 && milliseconds == 0 {
             timer?.invalidate()
             onCompletion?()
         }
