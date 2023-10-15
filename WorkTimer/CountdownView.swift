@@ -7,11 +7,19 @@
 
 import UIKit
 
+protocol CountdownViewDelegate: AnyObject {
+    func countdownDidComplete()
+}
+
 class CountdownView: UIView {
     // MARK: - Properties
-    private var countdown = Countdown()
-    private var isWorkTime = false
+    weak var delegate: CountdownViewDelegate?
 
+    private var countdown = Countdown()
+    var isWorkTime = false
+    var isRunning: Bool {
+        return countdown.isRunning
+    }
 
     // MARK: - Components
     private lazy var progressLayer: CAShapeLayer = {
@@ -24,8 +32,8 @@ class CountdownView: UIView {
                                         clockwise: true)
         layer.path = circularPath.cgPath
 
-        layer.strokeColor = UIColor.blue.cgColor
-        layer.lineWidth = 3
+//        layer.strokeColor = UIColor.blue.cgColor
+        layer.lineWidth = 8
         layer.fillColor = UIColor.clear.cgColor
         layer.lineCap = .round
         layer.strokeEnd = 0
@@ -33,11 +41,31 @@ class CountdownView: UIView {
         return layer
     }()
 
+    private lazy var trackLayer: CAShapeLayer = {
+        let layer = CAShapeLayer()
+        let circularPath = UIBezierPath(arcCenter: CGPoint(x: self.center.x,
+                                                           y: self.center.y),
+                                        radius: self.bounds.width / 2,
+                                        startAngle: -CGFloat.pi / 2,
+                                        endAngle: 3 * CGFloat.pi / 2,
+                                        clockwise: true)
+        layer.path = circularPath.cgPath
+
+        layer.strokeColor = UIColor.systemGray6.cgColor
+        layer.lineWidth = 8
+        layer.fillColor = UIColor.clear.cgColor
+        layer.lineCap = .round
+        layer.strokeEnd = 1
+
+        return layer
+    }()
+
+
     private lazy var timeLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 14)
+//        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 24)
         return label
     }()
 
@@ -55,7 +83,7 @@ class CountdownView: UIView {
 
     // MARK: - Setup
     private func setupUI() {
-        handleTap(duration: 0)
+        handleTap()
 
         setupHierarchy()
         setupConstraints()
@@ -64,7 +92,10 @@ class CountdownView: UIView {
     }
 
     private func setupHierarchy() {
+
+        layer.addSublayer(trackLayer)
         layer.addSublayer(progressLayer)
+
         addSubview(timeLabel)
     }
 
@@ -74,7 +105,9 @@ class CountdownView: UIView {
         }
 
         countdown.onCompletion = {
-            self.handleTap(duration: 0)
+            self.handleTap()
+            self.delegate?.countdownDidComplete()
+
         }
 
 
@@ -112,13 +145,18 @@ class CountdownView: UIView {
 
     // MARK: - Functions
 
-    private func handleTap(duration: Int) {
+    private func handleTap() {
         if isWorkTime {
             countdown.reset(hours: 0, minutes: 0, seconds: 1)
-            progressLayer.strokeColor = UIColor.green.cgColor
+            progressLayer.strokeColor = UIColor(named: "RestColor")?.cgColor
+            timeLabel.textColor = UIColor(named: "RestColor")
+
+
         } else  {
             countdown.reset(hours: 0, minutes: 0, seconds: 2)
-            progressLayer.strokeColor = UIColor.red.cgColor
+            progressLayer.strokeColor = UIColor(named: "WorkColor")?.cgColor
+            timeLabel.textColor = UIColor(named: "WorkColor")
+
         }
 
         isWorkTime.toggle()
