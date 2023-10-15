@@ -62,16 +62,40 @@
 		300266E42AD94C6F008FF1AF /* WorkTimer */ = {
 			isa = PBXGroup;
 			children = (
+				3002673E2ADC3ADD008FF1AF /* App */,
+				300267402ADC3B19008FF1AF /* Scene */,
+				3002673F2ADC3AF9008FF1AF /* Resources */,
+			);
+			path = WorkTimer;
+			sourceTree = "<group>";
+		};
+		3002673E2ADC3ADD008FF1AF /* App */ = {
+			isa = PBXGroup;
+			children = (
 				300266E52AD94C6F008FF1AF /* AppDelegate.swift */,
 				300266E72AD94C6F008FF1AF /* SceneDelegate.swift */,
-				300266F92AD94D0F008FF1AF /* MainViewController.swift */,
-				300266FB2AD960F0008FF1AF /* CountdownView.swift */,
-				300267022AD97EEA008FF1AF /* Countdown.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		3002673F2ADC3AF9008FF1AF /* Resources */ = {
+			isa = PBXGroup;
+			children = (
 				300266EE2AD94C71008FF1AF /* Assets.xcassets */,
 				300266F02AD94C71008FF1AF /* LaunchScreen.storyboard */,
 				300266F32AD94C71008FF1AF /* Info.plist */,
 			);
-			path = WorkTimer;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		300267402ADC3B19008FF1AF /* Scene */ = {
+			isa = PBXGroup;
+			children = (
+				300266F92AD94D0F008FF1AF /* MainViewController.swift */,
+				300266FB2AD960F0008FF1AF /* CountdownView.swift */,
+				300267022AD97EEA008FF1AF /* Countdown.swift */,
+			);
+			path = Scene;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -301,7 +325,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9CUB4SJUB5;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = WorkTimer/Info.plist;
+				INFOPLIST_FILE = WorkTimer/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -328,7 +352,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9CUB4SJUB5;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = WorkTimer/Info.plist;
+				INFOPLIST_FILE = WorkTimer/Resources/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
