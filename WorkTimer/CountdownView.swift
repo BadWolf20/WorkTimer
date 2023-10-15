@@ -13,9 +13,9 @@ protocol CountdownViewDelegate: AnyObject {
 
 class CountdownView: UIView {
     // MARK: - Properties
-    weak var delegate: CountdownViewDelegate?
-
     private var countdown = Countdown()
+
+    weak var delegate: CountdownViewDelegate?
     var isWorkTime = false
     var isRunning: Bool {
         return countdown.isRunning
@@ -32,7 +32,6 @@ class CountdownView: UIView {
                                         clockwise: true)
         layer.path = circularPath.cgPath
 
-//        layer.strokeColor = UIColor.blue.cgColor
         layer.lineWidth = 8
         layer.fillColor = UIColor.clear.cgColor
         layer.lineCap = .round
@@ -51,7 +50,7 @@ class CountdownView: UIView {
                                         clockwise: true)
         layer.path = circularPath.cgPath
 
-        layer.strokeColor = UIColor.systemGray6.cgColor
+        layer.strokeColor = UIColor(named: "TrackColor")?.cgColor
         layer.lineWidth = 8
         layer.fillColor = UIColor.clear.cgColor
         layer.lineCap = .round
@@ -60,17 +59,14 @@ class CountdownView: UIView {
         return layer
     }()
 
-
     private lazy var timeLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-//        label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 24)
         return label
     }()
 
     // MARK: - Initializers
-
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -92,7 +88,6 @@ class CountdownView: UIView {
     }
 
     private func setupHierarchy() {
-
         layer.addSublayer(trackLayer)
         layer.addSublayer(progressLayer)
 
@@ -107,10 +102,7 @@ class CountdownView: UIView {
         countdown.onCompletion = {
             self.handleTap()
             self.delegate?.countdownDidComplete()
-
         }
-
-
     }
 
     private func setupText() {
@@ -120,18 +112,10 @@ class CountdownView: UIView {
     private func setupConstraints() {
         timeLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
-
         }
     }
 
-    // MARK: - Update
-
-    private func updateUI() {
-
-    }
-
-
-    // MARK: - Actions
+    // MARK: - Functions Public
     func buttonAction() {
         if !countdown.isRunning {
             countdown.start()
@@ -142,18 +126,16 @@ class CountdownView: UIView {
         }
     }
 
-
     // MARK: - Functions
-
     private func handleTap() {
         if isWorkTime {
-            countdown.reset(hours: 0, minutes: 0, seconds: 1)
+            countdown.reset(hours: 0, minutes: 0, seconds: 4)
             progressLayer.strokeColor = UIColor(named: "RestColor")?.cgColor
             timeLabel.textColor = UIColor(named: "RestColor")
 
 
         } else  {
-            countdown.reset(hours: 0, minutes: 0, seconds: 2)
+            countdown.reset(hours: 0, minutes: 0, seconds: 8)
             progressLayer.strokeColor = UIColor(named: "WorkColor")?.cgColor
             timeLabel.textColor = UIColor(named: "WorkColor")
 
@@ -173,6 +155,7 @@ class CountdownView: UIView {
         timeLabel.text = countdown.timeString()
     }
 
+    // MARK: - Functions Private
     private func resumeAnimation(){
         let pausedTime = progressLayer.timeOffset
         progressLayer.speed = 1

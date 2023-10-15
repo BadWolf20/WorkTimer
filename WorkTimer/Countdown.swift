@@ -8,19 +8,25 @@
 import Foundation
 
 class Countdown {
+
+    // MARK: - Properties
+    private var timer: Timer?
+    private var milliseconds: Int
+
     var hours: Int
     var minutes: Int
     var seconds: Int
-    private var milliseconds: Int
+
     var isRunning: Bool {
         return timer != nil
     }
-    private var timer: Timer?
-
     // Коллбек, который будет вызываться при каждом обновлении
     var onTick: ((String) -> Void)?
+    // Коллбек, который будет вызываться при завершении отсчета
     var onCompletion: (() -> Void)?
 
+
+    // MARK: - Initializers
     init(hours: Int, minutes: Int, seconds: Int, milliseconds: Int = 0) {
         self.hours = hours
         self.minutes = minutes
@@ -35,10 +41,8 @@ class Countdown {
         self.milliseconds = 0
     }
 
-    // Возвращает общее количество секунд
-    func totalSeconds() -> Int {
-        return seconds + minutes * 60 + hours * 3600
-    }
+
+    // MARK: - Functions Private
 
     // Уменьшает счетчик на одну секунду
     private func decrement() {
@@ -59,13 +63,28 @@ class Countdown {
         }
     }
 
+    @objc private func update() {
+        decrement()
+        onTick?(timeString())
+
+        if totalSeconds() == 0 && milliseconds == 0 {
+            timer?.invalidate()
+            onCompletion?()
+        }
+    }
+
+    // MARK: - Functions Public
+
+    // Возвращает общее количество секунд
+    func totalSeconds() -> Int {
+        return seconds + minutes * 60 + hours * 3600
+    }
+
     // Возвращает строковое представление времени
     func timeString() -> String {
         let roundedSeconds = milliseconds >= 1 ? seconds + 1 : seconds
         return String(format: "%02d:%02d:%02d", hours, minutes, roundedSeconds)
     }
-
-    
 
     // Запускает или возобновляет таймер
     func start() {
@@ -89,17 +108,6 @@ class Countdown {
         self.minutes = minutes
         self.seconds = seconds
         self.milliseconds = milliseconds
-
-    }
-
-    @objc private func update() {
-        decrement()
-        onTick?(timeString())
-
-        if totalSeconds() == 0 && milliseconds == 0 {
-            timer?.invalidate()
-            onCompletion?()
-        }
     }
 }
 

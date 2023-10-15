@@ -13,14 +13,10 @@ class MainViewController: UIViewController {
     // MARK: - Properties
 
 
+
     // MARK: - Components
-    private lazy var twitterButton: UIButton = {
+    private lazy var playPauseButton: UIButton = {
         let button = UIButton(type: .system)
-
-        // Настройка основных свойств
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 35 / 2
-
         // Добавление события
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
 
@@ -35,23 +31,15 @@ class MainViewController: UIViewController {
         return view
     }()
 
-
-    // MARK: - Initializers
-
-
-
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setupConstraints()
-
-
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -63,8 +51,6 @@ class MainViewController: UIViewController {
         }, completion: nil)
     }
 
-
-
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .systemBackground
@@ -75,8 +61,7 @@ class MainViewController: UIViewController {
     }
 
     private func setupHierarchy() {
-        view.addSubview(twitterButton)
-
+        view.addSubview(playPauseButton)
         view.addSubview(countdownView)
     }
 
@@ -99,9 +84,11 @@ class MainViewController: UIViewController {
                 make.height.equalTo(getSmallestSideSize())
             }
             
-            twitterButton.snp.remakeConstraints { make in
+            playPauseButton.snp.remakeConstraints { make in
                 make.centerX.equalToSuperview()
-                make.centerY.equalToSuperview().multipliedBy(1.5)
+//                let t = (view.bounds.midY + getSmallestSideSize() / 2) + (view.bounds.height - (view.bounds.midY + getSmallestSideSize() / 2)) / 2
+                let midY = view.bounds.height / 2 + view.bounds.midY / 2 + getSmallestSideSize() / 4
+                make.centerY.equalTo(midY)
 
                 make.height.equalTo(100)
                 make.width.equalTo(100)
@@ -115,7 +102,7 @@ class MainViewController: UIViewController {
                 make.centerX.equalToSuperview().dividedBy(2)
             }
 
-            twitterButton.snp.remakeConstraints { make in
+            playPauseButton.snp.remakeConstraints { make in
                 make.centerY.equalToSuperview()
                 make.centerX.equalToSuperview().multipliedBy(1.5)
 
@@ -125,43 +112,39 @@ class MainViewController: UIViewController {
         }
     }
 
-    // MARK: - Update
-
-
-
     // MARK: - Actions
     @objc func buttonTapped() {
         countdownView.buttonAction()
         setButtonDesign()
     }
 
-
     // MARK: - Functions
-    func forOrientation(portrait: CGFloat, landscape: CGFloat) -> CGFloat {
+    private func forOrientation(portrait: CGFloat, landscape: CGFloat) -> CGFloat {
         return UIDevice.current.orientation.isPortrait ? portrait : landscape
     }
 
-    func setButtonDesign() {
+    private func setButtonDesign() {
         if countdownView.isRunning {
-            twitterButton.setBackgroundImage(UIImage(systemName: "pause.circle"), for: .normal)
+            playPauseButton.setBackgroundImage(UIImage(systemName: "pause.circle"), for: .normal)
 
         } else {
-            twitterButton.setBackgroundImage(UIImage(systemName: "play.circle"), for: .normal)
+            playPauseButton.setBackgroundImage(UIImage(systemName: "play.circle"), for: .normal)
         }
         
         if countdownView.isWorkTime {
-            twitterButton.tintColor =  UIColor(named: "WorkColor")
+            playPauseButton.tintColor =  UIColor(named: "WorkColor")
         } else {
-            twitterButton.tintColor = UIColor(named: "RestColor")
+            playPauseButton.tintColor = UIColor(named: "RestColor")
         }
     }
 
-    func getSmallestSideSize() -> Double {
+    private func getSmallestSideSize() -> Double {
         return min(view.bounds.width, view.bounds.height) * 0.6
     }
 
 }
 
+// MARK: - CountdownViewDelegate
 extension MainViewController: CountdownViewDelegate {
     func countdownDidComplete() {
         setButtonDesign()
